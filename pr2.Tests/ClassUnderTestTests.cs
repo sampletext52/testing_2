@@ -32,7 +32,47 @@ public class ClassUnderTestTests
         
         int result = _classUnderTest!.PublicMethod(arg);
         
-        Assert.That(result, Is.EqualTo(expectedResult));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(expectedResult));
+            _mockAffectingClass.Verify(x => x.Val, Times.AtLeastOnce);
+        });
+    }
+
+    [TestCase(5, 10, 10, 2)]
+    public void PublicMethod_VerifiesValPropertyWasCalled(int testArg, int affectingVal, int expectedResult, int expectedCallCount)
+    {
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
+
+        int result = _classUnderTest!.PublicMethod(testArg);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(expectedResult));
+            _mockAffectingClass.Verify(x => x.Val, Times.Exactly(expectedCallCount));
+        });
+    }
+
+    [TestCase(100, 50, 100)]
+    public void PublicMethod_WhenValLessThanArg_VerifiesValPropertyWasCalledOnce(int testArg, int affectingVal, int expectedResult)
+    {
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
+
+        int result = _classUnderTest!.PublicMethod(testArg);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(expectedResult));
+            _mockAffectingClass.Verify(x => x.Val, Times.Once);
+        });
+    }
+
+    [TestCase(5, 10)]
+    public void PublicMethod_VerifiesValPropertyWasCalledAtLeastOnce(int arg, int affectingVal)
+    {
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
+        _classUnderTest!.PublicMethod(arg);
+        _mockAffectingClass.Verify(x => x.Val, Times.AtLeastOnce);
     }
 }
 

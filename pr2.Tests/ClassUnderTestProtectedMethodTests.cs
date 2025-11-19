@@ -28,17 +28,19 @@ public class ClassUnderTestProtectedMethodTests
         _testableClass = new TestableClassUnderTest(_mockAffectingClass.Object);
     }
 
-    [Test]
-    public void ProtectedMethod_WhenArgIsZero_ThrowsArgumentException()
+    [TestCase(0, 10)]
+    public void ProtectedMethod_WhenArgIsZero_ThrowsArgumentException(int arg, int affectingVal)
     {
-        int arg = 0;
-        _mockAffectingClass!.Setup(x => x.Val).Returns(10);
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
 
         var exception = Assert.Throws<ArgumentException>(() => _testableClass!.CallProtectedMethod(arg));
         
-        Assert.That(exception, Is.Not.Null);
-        Assert.That(exception!.Message, Does.Contain("arg is equal to zero"));
-        Assert.That(exception.ParamName, Is.EqualTo("arg"));
+        Assert.Multiple(() =>
+        {
+            Assert.That(exception, Is.Not.Null);
+            Assert.That(exception!.Message, Does.Contain("arg is equal to zero"));
+            Assert.That(exception.ParamName, Is.EqualTo("arg"));
+        });
     }
 
     [TestCase(1, 5, 5)]
@@ -52,29 +54,33 @@ public class ClassUnderTestProtectedMethodTests
 
         int result = _testableClass!.CallProtectedMethod(arg);
 
-        Assert.That(result, Is.EqualTo(expectedResult));
-        _mockAffectingClass.Verify(x => x.Val, Times.Once);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(expectedResult));
+            _mockAffectingClass.Verify(x => x.Val, Times.Once);
+        });
     }
 
-    [Test]
-    public void ProtectedMethod_WhenArgIsZero_DoesNotAccessVal()
+    [TestCase(0, 10)]
+    public void ProtectedMethod_WhenArgIsZero_DoesNotAccessVal(int arg, int affectingVal)
     {
-        int arg = 0;
-        _mockAffectingClass!.Setup(x => x.Val).Returns(10);
-
-        Assert.Throws<ArgumentException>(() => _testableClass!.CallProtectedMethod(arg));
-
-        _mockAffectingClass.Verify(x => x.Val, Times.Never);
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.Throws<ArgumentException>(() => _testableClass!.CallProtectedMethod(arg));
+            _mockAffectingClass.Verify(x => x.Val, Times.Never);
+        });
     }
 
-    [TestCase(1)]
-    [TestCase(-1)]
-    [TestCase(100)]
-    [TestCase(int.MaxValue)]
-    [TestCase(int.MinValue)]
-    public void ProtectedMethod_WithNonZeroArg_DoesNotThrowException(int arg)
+    [TestCase(1, 42)]
+    [TestCase(-1, 42)]
+    [TestCase(100, 42)]
+    [TestCase(int.MaxValue, 42)]
+    [TestCase(int.MinValue, 42)]
+    public void ProtectedMethod_WithNonZeroArg_DoesNotThrowException(int arg, int affectingVal)
     {
-        _mockAffectingClass!.Setup(x => x.Val).Returns(42);
+        _mockAffectingClass!.Setup(x => x.Val).Returns(affectingVal);
 
         Assert.DoesNotThrow(() => _testableClass!.CallProtectedMethod(arg));
     }

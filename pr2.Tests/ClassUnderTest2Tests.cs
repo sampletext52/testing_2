@@ -34,9 +34,12 @@ public class ClassUnderTest2Tests
         int result2 = classUnderTest2_2.CallAffectingMethod();
         int result3 = classUnderTest2_3.CallAffectingMethod();
 
-        Assert.That(result1, Is.EqualTo(expectedResult));
-        Assert.That(result2, Is.EqualTo(expectedResult));
-        Assert.That(result3, Is.EqualTo(expectedResult));
+        Assert.Multiple(() =>
+        {
+            Assert.That(result1, Is.EqualTo(expectedResult));
+            Assert.That(result2, Is.EqualTo(expectedResult));
+            Assert.That(result3, Is.EqualTo(expectedResult));
+        });
     }
 
     [TestCase(1)]
@@ -49,8 +52,11 @@ public class ClassUnderTest2Tests
 
         int result = classUnderTest2.CallAffectingMethod();
 
-        Assert.That(result, Is.EqualTo(expectedResult));
-        mockAffectingClass.Verify(x => x.Method(), Times.Once);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.EqualTo(expectedResult));
+            mockAffectingClass.Verify(x => x.Method(), Times.Once);
+        });
     }
 }
 
